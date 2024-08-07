@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite App</title>
+</head>
+
+<body>
+  <div id="app">
+    <div>
+      <a href="https://vitejs.dev" target="_blank">
+        <img src="/vite.svg" class="logo" alt="Vite logo" />
+      </a>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
+        <img src="/javascript.svg" class="logo vanilla" alt="JavaScript logo" />
+      </a>
+      <h1>Hello Vite + Firebase + Firestone!</h1>
+      <p class="read-the-docs">
+        Click on the Vite logo to learn more
+      </p>
+      <label>Usuário</label>
+      <input id="inputUser" type="text" />
+      <label>Senha</label>
+      <input id="inputPass" type="text" />
+    </div>
+    <div>
+      <button id="loginBtn">
+        entrar
+      </button>
+    </div>
+  </div>
+  <script type="module" src="/main.js"></script>
+  <script type="module">
+    import { signInWithEmailAndPassword, authFs, db } from "/main.js";
+    import { collection, getDocs, query, where } from "firebase/firestore";
+
+    
+    
+    const login = async () => {
+      try {
+        let user = document.getElementById("inputUser").value;
+        let password = document.getElementById("inputPass").value;
+        console.log("Usuário: " + user);
+        
+        let email = user.includes("@") && user.includes(".com") ? user : await getEmailByUserName(user);
+        console.log("Email obtido: " + email);
+        const userCredential = await signInWithEmailAndPassword(authFs, email, password);
+        console.log('Logado com sucesso:', userCredential.user);
+      } catch (error) {
+        if (error.code.includes("invalid-email"))
+          alert('Usuário e/ou senha inválidos');
+        else {
+          alert(error)
+        }
+      } finally {
+        clearInputs();
+      }
+    };
+
+    const getEmailByUserName = async (userName) => {
+      try {
+        let email = "";
+        const q = query(collection(db, "users"), where("user", "==", userName))
+        const response = await getDocs(q);
+
+        if (response.empty)
+          console.error("Usuário não encontrado para os dados informados.");
+
+        response.forEach((doc) => {
+          // Assumindo que há apenas um documento correspondente
+          console.log(doc.data().mail);
+          email = doc.data().mail;
+        });
+
+        return email;
+
+      } catch (ex) {
+        console.error(ex);
+      }
+    }
+
+    const clearInputs = () => {
+      //document.getElementById("inputUser").value = "";
+      //document.getElementById("inputPass").value = "";
+    }
+    document.getElementById("loginBtn").addEventListener("click", login);
+
+  </script>
+</body>
+
+</html>
