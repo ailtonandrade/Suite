@@ -34,17 +34,22 @@
   </div>
   <script type="module" src="/main.js"></script>
   <script type="module">
-    import { signInWithEmailAndPassword, authFs, db } from "/main.js";
+    //IMPORTS
+    import { signInWithEmailAndPassword, authFs, db, sdb } from "/main.js";
     import { collection, getDocs, query, where } from "firebase/firestore";
+    //CONSTS
+    //METHODS
 
-    
-    
+    const { data, error } = await sdb.from("users").select('*');
+      if (error) console.error('Error fetching users:', error);
+      else console.log(data);
+
     const login = async () => {
       try {
         let user = document.getElementById("inputUser").value;
         let password = document.getElementById("inputPass").value;
         console.log("Usuário: " + user);
-        
+
         let email = user.includes("@") && user.includes(".com") ? user : await getEmailByUserName(user);
         console.log("Email obtido: " + email);
         const userCredential = await signInWithEmailAndPassword(authFs, email, password);
@@ -83,11 +88,11 @@
     }
 
     const clearInputs = () => {
-      //document.getElementById("inputUser").value = "";
-      //document.getElementById("inputPass").value = "";
+      document.getElementById("inputUser").value = "";
+      document.getElementById("inputPass").value = "";
     }
+    //EVENTS
     document.getElementById("loginBtn").addEventListener("click", login);
-
   </script>
 </body>
 
